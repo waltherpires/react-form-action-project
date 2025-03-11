@@ -1,13 +1,17 @@
-import { useActionState } from "react";
+import { useActionState, use } from "react";
+
+import { OpinionsContext } from "../store/opinions-context";
 
 export function NewOpinion() {
-  function shareOpinionAction(prevFormState, formData) {
-    const username = formData.get("userName");
+  const { addOpinion } = use(OpinionsContext);
+
+  async function shareOpinionAction(prevFormState, formData) {
+    const userName = formData.get("userName");
     const title = formData.get("title");
     const body = formData.get("body");
 
     let errors = [];
-    if (!username.trim()) {
+    if (!userName.trim()) {
       errors.push("Invalid username");
     }
     if (title.trim().length < 5) {
@@ -17,17 +21,18 @@ export function NewOpinion() {
       errors.push("Invalid body");
     }
 
-    if (errors.length > 0) {
+      if (errors.length > 0) {
       return {
         errors,
         enteredValues: {
-          username,
           title,
           body,
+          userName,
         },
       };
     }
 
+    await addOpinion({ title, body, userName });
     return { errors: null };
   }
 
@@ -46,7 +51,7 @@ export function NewOpinion() {
               type="text"
               id="userName"
               name="userName"
-              defaultValue={formState.enteredValues?.username}
+              defaultValue={formState.enteredValues?.userName}
             />
           </p>
 
@@ -76,11 +81,11 @@ export function NewOpinion() {
       </form>
 
       {formState.errors && (
-          <ul className="errors">
-            {formState.errors.map((error) => (
-              <li key={error}>{error}</li>
-            ))}
-          </ul>
+        <ul className="errors">
+          {formState.errors.map((error) => (
+            <li key={error}>{error}</li>
+          ))}
+        </ul>
       )}
     </div>
   );
